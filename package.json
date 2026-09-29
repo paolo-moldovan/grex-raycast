@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "grex",
+  "title": "Grex",
+  "description": "Generate regular expressions from examples with grex, then loosen them level by level while checking against lines that must not match",
+  "icon": "extension-icon.png",
+  "author": "Peretz27",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-regex",
+      "title": "Generate Regex",
+      "subtitle": "Grex",
+      "description": "Generate a regular expression from test cases using grex",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "grexPath",
+      "type": "file",
+      "title": "Grex Binary",
+      "description": "Path to the grex executable. Leave empty to auto-detect (Homebrew, Cargo, PATH).",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "npx @raycast/api@latest pull-contributions"
+  },
+  "keywords": [
+    "regex",
+    "regexp",
+    "regular expression",
+    "grex",
+    "generate"
+  ]
+}
