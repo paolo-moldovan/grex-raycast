@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import {
   Candidate,
   generalize,
+  generalizeGroups,
   recommended,
   score,
   ScoredCandidate,
@@ -128,7 +129,7 @@ function Levels({
           command: rep.command,
         });
       }
-      candidates.push(...generalize(positives));
+      candidates.push(...generalizeGroups(positives), ...generalize(positives));
       const levels = score(
         candidates,
         positives,

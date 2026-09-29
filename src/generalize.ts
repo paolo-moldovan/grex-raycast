@@ -214,3 +214,61 @@ export function recommended(scored: ScoredCandidate[]): number {
   for (let i = scored.length - 1; i >= 0; i--) if (scored[i].perfect) return i;
   return 0;
 }
+
+/** Splits examples into groups that share a start (through the first separator) or an end. */
+function partition(
+  positives: string[],
+): { key: string; items: string[] }[] | undefined {
+  const byPrefix = (x: string) => {
+    const c = chars(x);
+    const i = c.findIndex((ch) => !isWordChar(ch));
+    return i < 0 ? x : c.slice(0, i + 1).join("");
+  };
+  const bySuffix = (x: string) => {
+    const c = chars(x);
+    let i = c.length - 1;
+    while (i >= 0 && isWordChar(c[i])) i--;
+    return i < 0 ? x : c.slice(i).join("");
+  };
+  let best: { key: string; items: string[] }[] | undefined;
+  for (const keyOf of [byPrefix, bySuffix]) {
+    const groups = new Map<string, string[]>();
+    for (const x of positives)
+      groups.set(keyOf(x), [...(groups.get(keyOf(x)) ?? []), x]);
+    const list = [...groups].map(([key, items]) => ({ key, items }));
+    // Useful only when it actually splits the examples and some group has several members.
+    if (list.length < 2 || list.length === positives.length) continue;
+    if (!best || list.length < best.length) best = list;
+  }
+  return best;
+}
+
+const bothAnchored = (r: string) =>
+  r.startsWith("^") && r.endsWith("$") && !r.endsWith("\\$");
+
+/**
+ * For examples with no single shared start and end (`val/a_loss`, `train/b_err`), loosens each
+ * group on its own and joins the groups as alternatives: ^(?:val/\w+_loss|train/\w+_err)$.
+ */
+export function generalizeGroups(positives: string[]): Candidate[] {
+  const groups = partition(positives);
+  if (!groups) return [];
+  const ladders = groups.map(({ items }) => {
+    const exact = items.map(escape).join("|");
+    const steps = generalize(items)
+      .map((c) => c.regex)
+      .filter(bothAnchored)
+      .map((r) => r.slice(1, -1));
+    return [items.length > 1 ? `(?:${exact})` : exact, ...steps];
+  });
+  const depth = Math.max(...ladders.map((l) => l.length));
+  const out: Candidate[] = [];
+  for (let k = 1; k < depth; k++) {
+    const alternatives = ladders.map((l) => l[Math.min(k, l.length - 1)]);
+    out.push({
+      label: `${groups.length} groups (${groups.map((g) => g.key).join(" ")}), step ${k}`,
+      regex: `^(?:${alternatives.join("|")})$`,
+    });
+  }
+  return out;
+}

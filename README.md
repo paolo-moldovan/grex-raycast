@@ -28,6 +28,8 @@ The result is a list of tightness levels, from grex's exact regex down to looser
 | Anything in the middle | `^val/raw_.+_loss$` |
 | Shorter shared start and end | `^val/.+_loss$` |
 
+When the examples don't share one start and end (`val/a_loss`, `train/b_err`), they are split into groups by their start or end. Each group is loosened separately and the groups are joined with `|`, for example `^(?:val/\w+_loss|train/\w+_err)$`.
+
 Every level is tested against your examples:
 
 - ⭐ The loosest level that matches every **Should Match** line and no **Should Not Match** line. It is selected by default.
